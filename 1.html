@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,target-densitydpi=device-dpi"/>
+    <script>
+        document.getElementsByTagName("html")[0].style.fontSize=window.screen.width/10+"px";
+        // 文字的宽度是屏幕的1/10 这个时候你可以看一下字体的大小，会通过屏幕宽度的改变去改变，但是始终是屏幕的1/10
+        // 也就是屏幕被平分成了10份，1份是1rem
+    </script>
+    <style>
+        body,h1,h2,h3,h4,h5,h6,p,ul,ol,pre,form,input{margin: 0;padding: 0;font-family: arial;}
+        em{font-style: normal;}
+        li{list-style: none;}
+        a{text-decoration: none;}
+        img{border: none;vertical-align: top;}
+        input,textarea{resize: none;overflow: auto;}
+        body{ font-size: 0.5rem; background-color: #e1e1e1; }
+        /* 不影响正常页面的字体大小，比如说320的屏幕，我希望是16px=0.5*32 */
+        #picWrap{ width: 100%; overflow: hidden; }
+        #picList{ width: 40rem; overflow: hidden; }
+        /* 一个图片是一个屏幕=10rem overflow:hidden 是为了清浮动的 */
+        #picList a{ float: left; }
+        #picList a img{ width: 10rem; }
+        /* 设置一下图片的大小，不要去设置a标签的大小 */
+        #btns{ height: 0.2rem; padding: 0.15rem; text-align: center; }
+        #btns span{ display: inline-block; width: 0.2rem; height: 0.2rem;background: #ffffff; vertical-align: top;
+                    border: 1px solid #000; border-radius: 0.1rem; box-sizing: border-box; }
+        #btns .active{ background-color: red; }
+    </style>
+</head>
+<body>
+<section id="picWrap">
+    <nav id="picList">
+        <a href="#1"><img src="img/1.jpg"></a>
+        <a href="#2"><img src="img/2.jpg"></a>
+        <a href="#3"><img src="img/3.jpg"></a>
+        <a href="#4"><img src="img/4.jpg"></a>
+    </nav>
+</section>
+<p id="btns">
+    <span class="active"></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</p>
+<script>
+    var oPicList=document.getElementById("picList");
+    var aBtns=document.getElementById("btns").children;
+    var iScroll=0;// 存的是oPicList的translateX的值
+    var iNow=0;// 你还要知道span是到第几个了
+    var iStartX=0;// 手指放上去的初始位置
+    var iStartScroll=0;// 手指放上去的时候初始的translateX的值
+    document.addEventListener("touchmove",function(ev){
+        ev.preventDefault();// 防止某些手机在拖拽的时候不跟着走，比如说有一些三星手机
+    },false);
+    oPicList.addEventListener("touchstart",start,false);
+    function start(ev){
+        iStartX=ev.changedTouches[0].pageX;// 初始手指位置
+        iStartScroll=iScroll;// 手指按下的时候要把一次的iScroll的值赋值给iStartScroll
+        //console.log("初始位置",iStartScroll);
+    }
+    oPicList.addEventListener("touchmove",move,false);
+    function move(ev){
+        var iDis=ev.changedTouches[0].pageX-iStartX;// 移动时候当前位置减去初始位置
+        iScroll=iStartScroll+iDis;
+        //console.log("translateX",iScroll);
+        toStyle();// 手指动的时候，让oPicList也跟着一起动！
+    }
+    oPicList.addEventListener("touchend",end,false);
+    function end(ev){// 手指移开的时候刚好停在某一个图片上，也就是某一屏幕上（有可能图片拉了一般，手指就抬开了）
+        var iDis=ev.changedTouches[0].pageX-iStartX;// 移动时候当前位置减去初始位置
+        iScroll=iStartScroll+iDis;// 是一个负数
+        iNow=-iScroll/window.screen.width;// 取反一下
+        //console.log("比值",iNow);
+        //iNow=iNow%1;// 得出了余数
+        //console.log("余数",iNow);
+        if(iNow%1<0.3){
+            iNow=Math.floor(iNow);
+        }else{
+            iNow=Math.ceil(iNow);
+        }
+        console.log("现在的值",iNow);// 0,1,2,3,4
+        if(iNow<0){
+            iNow=0;
+        }
+        if(iNow>aBtns.length-1){//长度为4
+            iNow=aBtns.length-1;// iNow正常的应该在0,1,2,3，也就是最后一张图片的索引值是3
+        }
+        iScroll=-iNow*window.screen.width;// 向前走是一个负数的
+        for(var i=0;i<aBtns.length;i++){
+            aBtns[i].className="";
+        }
+        aBtns[iNow].className="active";
+        oPicList.style.transition=oPicList.style.webkitTransition=0.2+"s";
+        // pc端transition已经不用加前缀了,在移动端最好在一下
+        toStyle();
+    }
+    function toStyle(){
+        oPicList.style.transform=oPicList.style.webkitTransform="translateX("+ iScroll +"px)";
+    }
+</script>
+</body>
+</html>

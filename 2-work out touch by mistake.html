@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,target-densitydpi=device-dpi"/>
+    <script>
+        document.getElementsByTagName("html")[0].style.fontSize=window.screen.width/10+"px";
+    </script>
+    <style>
+        body,h1,h2,h3,h4,h5,h6,p,ul,ol,pre,form,input{margin: 0;padding: 0;font-family: arial;}
+        em{font-style: normal;}
+        li{list-style: none;}
+        a{text-decoration: none;}
+        img{border: none;vertical-align: top;}
+        input,textarea{resize: none;overflow: auto;}
+        body{ font-size: 0.5rem; background-color: #e1e1e1; }
+        #picWrap{ width: 100%; overflow: hidden; }
+        #picList{ width: 40rem; overflow: hidden; }
+        #picList a{ float: left; }
+        #picList a img{ width: 10rem; }
+        #btns{ height: 0.2rem; padding: 0.15rem; text-align: center; }
+        #btns span{ display: inline-block; width: 0.2rem; height: 0.2rem;background: #ffffff; vertical-align: top;
+                    border: 1px solid #000; border-radius: 0.1rem; box-sizing: border-box; }
+        #btns .active{ background-color: red; }
+    </style>
+</head>
+<body>
+<section id="picWrap">
+    <nav id="picList">
+        <!-- 解决误触的办法 拖拽过就不容易为误触了 -->
+        <a data-href="http://www.baidu.com" ontouchmove="this.s=1" ontouchend="this.s||window.open(this.dataset.href),this.s=0"><img src="img/1.jpg"></a>
+        <a data-href="http://www.qq.com" ontouchmove="this.s=1" ontouchend="this.s||window.open(this.dataset.href),this.s=0"><img src="img/2.jpg"></a>
+        <a data-href="http://www.163.com" ontouchmove="this.s=1" ontouchend="this.s||window.open(this.dataset.href),this.s=0"><img src="img/3.jpg"></a>
+        <a data-href="http://www.miaov.com" ontouchmove="this.s=1" ontouchend="this.s||window.open(this.dataset.href),this.s=0"><img src="img/4.jpg"></a>
+    </nav>
+</section>
+<p id="btns">
+    <span class="active"></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</p>
+<script>
+    var oPicList=document.getElementById("picList");
+    var aBtns=document.getElementById("btns").children;
+    var iScroll=0;
+    var iNow=0;
+    var iStartX=0;
+    var iStartScroll=0;
+    document.addEventListener("touchmove",function(ev){
+        ev.preventDefault();
+    },false);
+    oPicList.addEventListener("touchstart",start,false);
+    function start(ev){
+        iStartX=ev.changedTouches[0].pageX;
+        iStartScroll=iScroll;
+    }
+    oPicList.addEventListener("touchmove",move,false);
+    function move(ev){
+        var iDis=ev.changedTouches[0].pageX-iStartX;
+        iScroll=iStartScroll+iDis;
+        toStyle();
+    }
+    oPicList.addEventListener("touchend",end,false);
+    function end(ev){
+        var iDis=ev.changedTouches[0].pageX-iStartX;
+        iScroll=iStartScroll+iDis;
+        iNow=-iScroll/window.screen.width;
+        if(iNow%1<0.3){
+            iNow=Math.floor(iNow);
+        }else{
+            iNow=Math.ceil(iNow);
+        }
+        console.log("现在的值",iNow);
+        if(iNow<0){
+            iNow=0;
+        }
+        if(iNow>aBtns.length-1){
+            iNow=aBtns.length-1;
+        }
+        iScroll=-iNow*window.screen.width;
+        for(var i=0;i<aBtns.length;i++){
+            aBtns[i].className="";
+        }
+        aBtns[iNow].className="active";
+        oPicList.style.transition=oPicList.style.webkitTransition=0.2+"s";
+        toStyle();
+    }
+    function toStyle(){
+        oPicList.style.transform=oPicList.style.webkitTransform="translateX("+ iScroll +"px)";
+    }
+// 解决误触问题
+</script>
+</body>
+</html>
